@@ -2,6 +2,7 @@ require "ruby_outlook/version"
 require "faraday"
 require 'securerandom'
 require "json"
+require 'hashie'
 
 module RubyOutlook
   class Client
@@ -591,7 +592,7 @@ module RubyOutlook
       # TODO: consider `return nil if response.nil? || response.empty?` for delete_* calls
       parsed = JSON.parse(response)
       parsed = transform_keys(parsed, (@return_format == :camel_case ? :downcase : :upcase)) if @return_format != @resource_format
-      parsed
+      Hashie::Mash.new(parsed)
     end
 
     def transform_keys(response, updown)
