@@ -1,7 +1,7 @@
 require "ruby_outlook/version"
 require "faraday"
 require 'securerandom'
-require "json"
+require 'multi_json'
 require 'hashie'
 
 module RubyOutlook
@@ -130,13 +130,13 @@ module RubyOutlook
         conn.headers['Content-Type'] = "application/json"
         response = conn.post do |request|
           request.url url, params
-          request.body = JSON.dump(payload)
+          request.body = MultiJson.dump(payload)
         end
       when "PATCH"
         conn.headers['Content-Type'] = "application/json"
         response = conn.patch do |request|
           request.url url, params
-          request.body = JSON.dump(payload)
+          request.body = MultiJson.dump(payload)
         end
       when "DELETE"
         response = conn.delete do |request|
@@ -149,12 +149,12 @@ module RubyOutlook
           ''
           else
             begin
-              JSON.parse( response.body )
-            rescue JSON::ParserError => _e
+              MultiJson.load( response.body )
+            rescue MultiJson::ParseError => _e
               response.body
             end
         end
-        return JSON.dump({
+        return MultiJson.dump({
                              'ruby_outlook_error' => response.status,
                              'ruby_outlook_response' => error_info })
       end
@@ -590,7 +590,7 @@ module RubyOutlook
 
     def parse_response(response)
       # TODO: consider `return nil if response.nil? || response.empty?` for delete_* calls
-      parsed = JSON.parse(response)
+      parsed = MultiJson.load(response)
       parsed = transform_keys(parsed, (@return_format == :camel_case ? :downcase : :upcase)) if @return_format != @resource_format
       Hashie::Mash.new(parsed)
     end

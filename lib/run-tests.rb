@@ -1,6 +1,6 @@
 # Run from project root like `ruby -Ilib ./lib/run-tests.rb`
 require './lib/ruby_outlook.rb'
-require 'json'
+require 'multi_json'
 require 'date' # Needed on Mac to use DateTime
 
 # TODO: Copy a valid, non-expired access token here.
@@ -52,7 +52,7 @@ def do_contact_api_tests(token)
   outlook_client = RubyOutlook::Client.new(return_format: :pascal_case, debug: DEBUG)
 
   puts 'Testing POST /me/contacts'
-  new_contact_json = JSON.parse(new_contact_payload)
+  new_contact_json = MultiJson.load(new_contact_payload)
   new_contact = outlook_client.create_contact token, new_contact_json
   assert(true, new_contact)
 
@@ -77,7 +77,7 @@ def do_contact_api_tests(token)
   assert(true, contact)
 
   puts 'Testing PATCH /me/contacts/id'
-  update_contact_json = JSON.parse(update_contact_payload)
+  update_contact_json = MultiJson.load(update_contact_payload)
   updated_contact = outlook_client.update_contact token, update_contact_json, new_contact['Id']
   assert(true, updated_contact)
 
@@ -138,7 +138,7 @@ def do_mail_api_tests(token)
   outlook_client = RubyOutlook::Client.new(return_format: :pascal_case, debug: DEBUG)
 
   puts 'Testing POST /me/messages'
-  new_message_json = JSON.parse(new_message_payload)
+  new_message_json = MultiJson.load(new_message_payload)
   new_message = outlook_client.create_message token, new_message_json
   assert(true, new_message)
 
@@ -163,7 +163,7 @@ def do_mail_api_tests(token)
   assert(true, message)
 
   puts 'Testing PATCH /me/messages/id'
-  update_message_json = JSON.parse(update_message_payload)
+  update_message_json = MultiJson.load(update_message_payload)
   updated_message = outlook_client.update_message token, update_message_json, new_message['Id']
   assert(true, updated_message)
 
@@ -172,7 +172,7 @@ def do_mail_api_tests(token)
   assert(delete_response.nil?, delete_response)
 
   puts 'Testing POST /me/sendmail'
-  send_message_json = JSON.parse(send_message_payload)
+  send_message_json = MultiJson.load(send_message_payload)
   send_response = outlook_client.send_message token, send_message_json
   assert(send_response.nil?, send_response)
 end
@@ -236,7 +236,7 @@ def do_calendar_api_tests(token)
 
 
   puts 'Testing POST /me/events'
-  new_event_json = JSON.parse(new_event_payload)
+  new_event_json = MultiJson.load(new_event_payload)
   new_event = outlook_client.create_event token, new_event_json
   assert(true, new_event)
 
@@ -268,7 +268,7 @@ def do_calendar_api_tests(token)
   assert(true, event)
 
   puts 'Testing PATCH /me/events/id'
-  update_event_json = JSON.parse(update_event_payload)
+  update_event_json = MultiJson.load(update_event_payload)
   updated_event = outlook_client.update_event token, update_event_json, new_event['Id']
   assert(true, updated_event)
 
