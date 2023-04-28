@@ -3,8 +3,42 @@ require "faraday"
 require 'securerandom'
 require 'multi_json'
 require 'hashie'
+require 'camel_snake_struct'
 
 module RubyOutlook
+  class Response < CamelSnakeStruct
+    include Enumerable
+
+    def initialize(data)
+      @data = data
+      super(data)
+    end
+
+    def each
+      value.each { |val| yield(val) }
+    end
+
+    def next_get_query
+      return nil unless odata_next_link
+
+      uri = URI.parse(odata_next_link)
+      params = CGI.parse(uri.query)
+      { select: params["$select"]&.first,
+        skip: params["$skip"]&.first,
+        filter: params["$filter"]&.first,
+        order_by: params["$orderBy"]&.first,
+        top: params["$top"]&.first }.compact
+    end
+
+    def size
+      value.size
+    end
+
+    def to_h
+      to_hash
+    end
+  end
+
   class Client
     # User agent
     attr_reader :user_agent
@@ -591,19 +625,7 @@ module RubyOutlook
     def parse_response(response)
       # TODO: consider `return nil if response.nil? || response.empty?` for delete_* calls
       parsed = MultiJson.load(response)
-      parsed = transform_keys(parsed, (@return_format == :camel_case ? :downcase : :upcase)) if @return_format != @resource_format
-      Hashie::Mash.new(parsed)
-    end
-
-    def transform_keys(response, updown)
-      if response.respond_to? :transform_keys!
-        response.transform_keys! do |k|
-          k[0] ? k.sub(/./) {|c| c.send(updown) } : k
-        end
-        response.transform_values!{|v| transform_keys(v, updown)}
-      end
-
-      response
+      Response.new(parsed)
     end
 
   end
