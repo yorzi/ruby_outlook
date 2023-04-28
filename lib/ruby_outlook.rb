@@ -23,11 +23,13 @@ module RubyOutlook
 
       uri = URI.parse(odata_next_link)
       params = CGI.parse(uri.query)
-      { select: params["$select"]&.first,
+      Hashie::Mash.new({ 
+        select: params["$select"]&.first,
         skip: params["$skip"]&.first,
         filter: params["$filter"]&.first,
         order_by: params["$orderBy"]&.first,
         top: params["$top"]&.first }.compact
+      )
     end
 
     def size
