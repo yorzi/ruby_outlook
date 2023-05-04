@@ -32,6 +32,22 @@ module RubyOutlook
       )
     end
 
+    def next_delta_get_query
+      return nil unless odata_next_link
+
+      uri = URI.parse(odata_next_link)
+      params = CGI.parse(uri.query)
+      { skiptoken: params["$skiptoken"]&.first }.compact
+    end
+
+    def delta_query
+      return nil unless odata_delta_link
+
+      uri = URI.parse(odata_delta_link)
+      params = CGI.parse(uri.query)
+      { deltatoken: params["$deltatoken"]&.first }.compact
+    end
+
     def size
       value.size
     end
