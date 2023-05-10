@@ -37,9 +37,7 @@ module RubyOutlook
 
       uri = URI.parse(odata_next_link)
       params = CGI.parse(uri.query)
-      Hashie::Mash.new(
-        { skiptoken: params["$skiptoken"]&.first }.compact
-      )
+      { skiptoken: params["$skiptoken"]&.first }.compact
     end
 
     def delta_query
@@ -47,9 +45,7 @@ module RubyOutlook
 
       uri = URI.parse(odata_delta_link)
       params = CGI.parse(uri.query)
-      Hashie::Mash.new(
-        { deltatoken: params["$deltatoken"]&.first }.compact
-      )
+      { deltatoken: params["$deltatoken"]&.first }.compact
     end
 
     def size
